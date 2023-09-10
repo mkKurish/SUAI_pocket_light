@@ -5,8 +5,8 @@ import kotlinx.serialization.*
 @Serializable
 data class SUAIRaspElement(
     val ItemId: Int,
-    val Week: Int,
-    val Day: Int,
+    val Week: Byte,
+    val Day: Byte,
     val Less: Int,
     val Build: String,
     val Rooms: String,

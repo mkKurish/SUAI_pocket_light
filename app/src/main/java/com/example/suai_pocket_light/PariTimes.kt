@@ -7,7 +7,7 @@ enum class PariTimes(val start: String, val end: String, val order: Byte) {
     FOURTH("15:00", "16:30", 4),
     FIFTH("16:40", "18:10", 5),
     SIXTH("18:30", "20:00", 6),
-    UNDEFINED("--:--", "--:--", 7);
+    UNDEFINED("--:--", "--:--", 0);
 
     companion object {
         fun setParaTime(num: Int) = when (num) {

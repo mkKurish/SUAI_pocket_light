@@ -40,7 +40,7 @@ fun customDarkColors() = CustomColors(
     evenWeek = Color(0xFF322EE5),
     background = Color(0xFF222222),
     mainCard = Color(0xFF2A2A2A),
-    additionalCard = Color(0xFF333333)
+    additionalCard = Color(0xFF404040)
 )
 
 fun customLightColors() = CustomColors(
@@ -52,7 +52,7 @@ fun customLightColors() = CustomColors(
     kursText = Color(0xFF04B200),
     oddWeek = Color(0xFFB9002C),
     evenWeek = Color(0xFF0400B9),
-    background = Color(0xFFEEEEEE),
+    background = Color(0xFFF2F2F2),
     mainCard = Color(0xFFFFFFFF),
     additionalCard = Color(0xFFEEEEEE)
 )

@@ -10,8 +10,8 @@ data class Subject(
     val room: String,
     val groups: String,
     val teacher: String,
-    val week: Int,
-    val day: Int
+    val week: Byte,
+    val day: Byte
 ) {
     constructor(schedule: SUAIRaspElement) : this(
         setParaTime(schedule.Less),
