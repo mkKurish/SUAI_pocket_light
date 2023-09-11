@@ -4,11 +4,12 @@ import android.annotation.SuppressLint
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
+import java.util.Locale
 
 object TimeUtil {
-    private val today: Calendar = run {
+    val today: Calendar = run {
         val temp = Calendar.getInstance()
-        temp.setTimeInMillis(System.currentTimeMillis())
+        temp.timeInMillis = System.currentTimeMillis()
         temp
     }
     private val fistStudyDay = run {
@@ -20,22 +21,36 @@ object TimeUtil {
         )
         temp
     }
-    val curWeekType: Byte
+
+    @SuppressLint("SimpleDateFormat")
+    fun printAllDate(calInst: Calendar){
+        println(SimpleDateFormat("H:m:S d.MMMM.y").format(Date(calInst.timeInMillis)))
+        println("curWeekType = ${curWeekType(calInst)} (${curWeekTypeName(calInst)})")
+        println("curDay = ${curDay(calInst)}")
+        println("curWeekdayName = ${curWeekdayName(calInst)} (${curWeekday(calInst)})")
+    }
+
+    fun curWeekType(calInst: Calendar): Byte =
         // Example: нечетная
-        get() = if ((today.get(Calendar.WEEK_OF_YEAR) - fistStudyDay.get(Calendar.WEEK_OF_YEAR)) % 2 == 0) 1 else 2
-    val curWeekTypeName: String
+        if ((calInst.get(Calendar.WEEK_OF_YEAR) - fistStudyDay.get(Calendar.WEEK_OF_YEAR)) % 2 == 0) 1 else 2
+    fun curWeekTypeName(calInst: Calendar): String =
         // Example: нечетная
-        get() = if ((today.get(Calendar.WEEK_OF_YEAR) - fistStudyDay.get(Calendar.WEEK_OF_YEAR)) % 2 == 0) "нечетная" else "четная"
-    val curDay: String
-        // Example: 12 сентября
-        @SuppressLint("SimpleDateFormat")
-        get() = SimpleDateFormat("d MMMM").format(Date(today.timeInMillis))
-    val curWeekday: Byte
+        if (curWeekType(calInst) == 1.toByte()) "нечетная" else "четная"
+    @SuppressLint("SimpleDateFormat")
+    fun curDay(calInst: Calendar): String =
+        // Example: 12 сентября d MMMM
+        SimpleDateFormat("d MMMM").format(Date(calInst.timeInMillis))
+    fun curWeekday(calInst: Calendar): Byte =
+        // Example: 1
+        (if (calInst.get(Calendar.DAY_OF_WEEK) - 1 == 0) 7 else calInst.get(Calendar.DAY_OF_WEEK) - 1).toByte()
+    @SuppressLint("SimpleDateFormat")
+    fun curWeekdayName(calInst: Calendar): String =
         // Example: понедельник
-        @SuppressLint("SimpleDateFormat")
-        get() = today.get(Calendar.DAY_OF_WEEK).toByte()
-    val curWeekdayName: String
-        // Example: понедельник
-        @SuppressLint("SimpleDateFormat")
-        get() = SimpleDateFormat("EEEE").format(Date(today.timeInMillis))
+        SimpleDateFormat("EEEE").format(Date(calInst.timeInMillis))
+
+    fun nextDay(days: Int):Calendar {
+        val calendarIter = Calendar.getInstance()
+        calendarIter.timeInMillis = today.timeInMillis + days * 86400000
+        return calendarIter
+    }
 }

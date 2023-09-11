@@ -2,6 +2,7 @@ package com.example.suai_pocket_light
 
 import android.content.res.Configuration
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -21,6 +22,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -30,6 +33,8 @@ import com.example.suai_pocket_light.TimeUtil.curDay
 import com.example.suai_pocket_light.TimeUtil.curWeekType
 import com.example.suai_pocket_light.TimeUtil.curWeekTypeName
 import com.example.suai_pocket_light.TimeUtil.curWeekdayName
+import com.example.suai_pocket_light.TimeUtil.nextDay
+import com.example.suai_pocket_light.TimeUtil.today
 import com.example.suai_pocket_light.ui.theme.CustomTheme
 import com.example.suai_pocket_light.ui.theme.MainTheme
 import com.example.suai_pocket_light.ui.theme.cornersRadius
@@ -40,9 +45,6 @@ import com.example.suai_pocket_light.ui.theme.spacingSmall
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun ListOfSubjects(subjectsList: List<List<Subject>>) {
-    val wktp = curWeekType
-
-
     LazyColumn(
         modifier = Modifier
             .padding(horizontal = spacingMedium, vertical = spacingSmall)
@@ -50,27 +52,35 @@ fun ListOfSubjects(subjectsList: List<List<Subject>>) {
         stickyHeader {
             CombinedWeekTypeLabel()
         }
-        if (subjectsList.size > 1) {
+        if (subjectsList.isNotEmpty()) {
             item {
                 CombinedDateLabel()
-                Subjects(subjectsList[0])
+                SubjectsListElement(subjectsList[0], curWeekdayName(nextDay(0)))
+            }
+            for (i in 1..<subjectsList.size) {
+                if (curWeekType(nextDay(i)) != curWeekType(nextDay(i - 1))) {
+                    stickyHeader {
+                        CombinedWeekTypeLabel(
+                            curWeekType(nextDay(i)),
+                            curDay(nextDay(i)),
+                            curWeekTypeName(nextDay(i))
+                        )
+                    }
+                }
+                item {
+                    if (subjectsList[i].isNotEmpty()) {
+                        if (subjectsList[i][0].para.order == 0.toByte()) {
+                            OutOfTheGridLabel()
+                        } else {
+                            SimpleDateLabel(curWeekdayName(nextDay(i)), curDay(nextDay(i)))
+                        }
+                    } else {
+                        SimpleDateLabel(curWeekdayName(nextDay(i)), curDay(nextDay(i)))
+                    }
+                    SubjectsListElement(subjectsList[i], curWeekdayName(nextDay(i)))
+                }
             }
         }
-        for (i in 1..<(subjectsList.size - 1)) {
-            item {
-                SimpleDateLabel()
-                Subjects(subjectsList[i])
-            }
-        }
-        item {
-            if (subjectsList.last()[0].para.order == 0.toByte()) {
-                OutOfTheGridLabel()
-            } else {
-                SimpleDateLabel()
-            }
-            Subjects(subjectsList.last())
-        }
-
     }
 }
 
@@ -130,7 +140,7 @@ private fun SubjectsContent(subjects: List<Subject>) {
                                 Text(
                                     modifier = Modifier.padding(horizontal = spacingSmall),
                                     text = it.room,
-                                    fontSize = 10.sp,
+                                    fontSize = 12.sp,
                                     color = CustomTheme.colors.secondaryText
                                 )
 
@@ -146,6 +156,52 @@ private fun SubjectsContent(subjects: List<Subject>) {
             }
             Spacer(modifier = Modifier.height(spacingMedium))
         }
+    }
+}
+
+@Composable
+private fun SubjectsListElement(subjects: List<Subject>, dow: String = "NONE") {
+    if (subjects.isEmpty()) {
+        EmptyElement(dow)
+    } else {
+        Subjects(subjects)
+    }
+}
+
+@Composable
+private fun EmptyElement(dow: String) {
+    Card(
+        shape = RoundedCornerShape(cornersRadius),
+        colors = CardDefaults.cardColors(CustomTheme.colors.mainCard),
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(50.dp + spacingLarge * 2)
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Image(
+                painter = painterResource(CustomTheme.images.calendar_pic),
+                contentDescription = "icon",
+                contentScale = ContentScale.Inside,
+                modifier = Modifier.padding(spacingMedium*2)
+            )
+            Column {
+                Text(
+                    text = "$dow, пар нет!", color = CustomTheme.colors.primaryText,
+                    fontWeight = FontWeight.SemiBold
+                )
+                Spacer(modifier = Modifier.height(spacingSmall))
+                Text(text = "Можно спать спокойно!", color = CustomTheme.colors.secondaryText)
+            }
+        }
+    }
+}
+
+@Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES, name = "Dark mode")
+@Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_NO, name = "Light mode")
+@Composable
+private fun emtyElementPreview() {
+    MainTheme {
+        EmptyElement("Суббота")
     }
 }
 
@@ -172,7 +228,6 @@ private fun PreviewListOfSubjects() {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(400.dp)
         ) {
             ListOfSubjects(
                 listOf(
@@ -181,7 +236,7 @@ private fun PreviewListOfSubjects() {
                             PariTimes.FIRST,
                             PariTypes.LABA,
                             "Алгоритмы и структуры данных",
-                            "Б.М. 67 52-18",
+                            "Б.М. 52-18",
                             "4231; 4232; 4233К; 4236",
                             "Матьяш В.А. — доцент, канд. техн. наук, доцент",
                             1,
@@ -191,7 +246,7 @@ private fun PreviewListOfSubjects() {
                             PariTimes.SECOND,
                             PariTypes.KURSACH,
                             "Алгоритмы",
-                            "Б.М. 67 23-08",
+                            "Гаст. 23-08",
                             "4232",
                             "Матьяш В.А. — доцент",
                             1,
@@ -203,11 +258,23 @@ private fun PreviewListOfSubjects() {
                             PariTimes.FIFTH,
                             PariTypes.LEKCIA,
                             "Алгоритмы и структуры данных",
-                            "Б.М. 67 52-18",
+                            "Б.М. 52-18",
                             "4231; 4232; 4233К; 4236",
                             "Матьяш В.А. — доцент, канд. техн. наук, доцент",
                             1,
                             3
+                        )
+                    ),
+                    listOf(
+                        Subject(
+                            PariTimes.FIRST,
+                            PariTypes.PRAKTIKA,
+                            "Алгоритмы и структуры данных",
+                            "Б.М. 52-18",
+                            "4231; 4232; 4233К; 4236",
+                            "Матьяш В.А. — доцент, канд. техн. наук, доцент",
+                            2,
+                            1
                         )
                     )
                 )
@@ -217,7 +284,7 @@ private fun PreviewListOfSubjects() {
 }
 
 @Composable
-private fun SimpleDateLabel() {
+private fun SimpleDateLabel(cwdn: String = curWeekdayName(today), cd: String = curDay(today)) {
     // Вторник, 12 сентября
     Box(
         modifier = Modifier
@@ -225,17 +292,20 @@ private fun SimpleDateLabel() {
             .background(CustomTheme.colors.background)
     ) {
         Text(
-            text = "${curWeekdayName.replaceFirstChar { it.uppercase() }}, ${curDay}",
+            text = "${cwdn.replaceFirstChar { it.uppercase() }}, $cd",
             color = CustomTheme.colors.secondaryText
         )
     }
 }
 
 @Composable
-private fun SimpleWeekTypeLabel() {
+private fun SimpleWeekTypeLabel(
+    cwt: Byte = curWeekType(today),
+    cwtn: String = curWeekTypeName(today)
+) {
     // * Нечетная неделя
     val dotColor =
-        if (curWeekType == 1.toByte()) CustomTheme.colors.oddWeek else CustomTheme.colors.evenWeek
+        if (cwt == 1.toByte()) CustomTheme.colors.oddWeek else CustomTheme.colors.evenWeek
     Row(
         verticalAlignment = Alignment.CenterVertically, modifier = Modifier
             .fillMaxWidth()
@@ -249,14 +319,14 @@ private fun SimpleWeekTypeLabel() {
         ) {}
         Spacer(modifier = Modifier.width(spacingSmall))
         Text(
-            text = "${curWeekTypeName.replaceFirstChar { it.uppercase() }} неделя",
+            text = "${cwtn.replaceFirstChar { it.uppercase() }} неделя",
             color = CustomTheme.colors.secondaryText
         )
     }
 }
 
 @Composable
-private fun CombinedDateLabel() {
+private fun CombinedDateLabel(cwdn: String = curWeekdayName(today)) {
     // Воскресенье, сегодня
     Box(
         modifier = Modifier
@@ -264,17 +334,21 @@ private fun CombinedDateLabel() {
             .background(CustomTheme.colors.background)
     ) {
         Text(
-            text = "${curWeekdayName.replaceFirstChar { it.uppercase() }}, сегодня",
+            text = "${cwdn.replaceFirstChar { it.uppercase() }}, сегодня",
             color = CustomTheme.colors.secondaryText
         )
     }
 }
 
 @Composable
-private fun CombinedWeekTypeLabel() {
+private fun CombinedWeekTypeLabel(
+    cwt: Byte = curWeekType(today),
+    cd: String = curDay(today),
+    cwtn: String = curWeekTypeName(today)
+) {
     // * 10 сентября, четная неделя
     val dotColor =
-        if (curWeekType == 1.toByte()) CustomTheme.colors.oddWeek else CustomTheme.colors.evenWeek
+        if (cwt == 1.toByte()) CustomTheme.colors.oddWeek else CustomTheme.colors.evenWeek
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
@@ -289,7 +363,7 @@ private fun CombinedWeekTypeLabel() {
         ) {}
         Spacer(modifier = Modifier.width(spacingSmall))
         Text(
-            text = "$curDay, ${curWeekTypeName} неделя",
+            text = "$cd, $cwtn неделя",
             color = CustomTheme.colors.secondaryText
         )
     }
@@ -313,7 +387,7 @@ private fun OutOfTheGridLabel() {
 @Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES, name = "Dark mode")
 @Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_NO, name = "Light mode")
 @Composable
-fun LabelsPreview() {
+private fun LabelsPreview() {
     MainTheme {
         Column(Modifier.background(color = CustomTheme.colors.background)) {
             SimpleDateLabel()

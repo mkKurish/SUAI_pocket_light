@@ -7,6 +7,7 @@ import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.example.suai_pocket_light.R
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 
 val spacingSmall: Dp = 5.dp
@@ -57,26 +58,46 @@ fun customLightColors() = CustomColors(
     additionalCard = Color(0xFFEEEEEE)
 )
 
+data class CustomImages(
+    val calendar_pic: Int
+)
+
+fun customDarkImages() = CustomImages(
+    calendar_pic = R.drawable.calendar_icon_dark
+)
+fun customLightImages() = CustomImages(
+    calendar_pic = R.drawable.calendar_icon_light
+)
+
 object CustomTheme {
     val colors: CustomColors
         @Composable
         get() = localCustomColors.current
+    val images: CustomImages
+        @Composable
+        get() = localCustomImages.current
 }
 
 val localCustomColors = staticCompositionLocalOf<CustomColors> {
     error("No colors provided")
 }
 
+val localCustomImages = staticCompositionLocalOf<CustomImages> {
+    error("No images provided")
+}
+
 @Composable
 fun MainTheme(darkTheme: Boolean = isSystemInDarkTheme(), content: @Composable () -> Unit) {
     val systemUiController = rememberSystemUiController()
     val colors = if (isSystemInDarkTheme()) customDarkColors() else customLightColors()
+    val images = if (isSystemInDarkTheme()) customDarkImages() else customLightImages()
     systemUiController.setSystemBarsColor(
         color = colors.background,
         darkIcons = !darkTheme
     )
     CompositionLocalProvider(
         localCustomColors provides colors,
+        localCustomImages provides images,
         content = content
     )
 }
