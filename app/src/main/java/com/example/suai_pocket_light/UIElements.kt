@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -60,9 +61,8 @@ fun ListOfSubjects(subjectsList: List<List<Subject>>) {
             for (i in 1..<subjectsList.size) {
                 if (curWeekType(nextDay(i)) != curWeekType(nextDay(i - 1))) {
                     stickyHeader {
-                        CombinedWeekTypeLabel(
+                        SimpleWeekTypeLabel(
                             curWeekType(nextDay(i)),
-                            curDay(nextDay(i)),
                             curWeekTypeName(nextDay(i))
                         )
                     }
@@ -93,32 +93,36 @@ private fun SubjectsContent(subjects: List<Subject>) {
                     .fillMaxWidth()
                     .height(80.dp)
             ) {
-                Row {
+                Row(modifier = Modifier.padding(top = spacingSmall)) {
+                    Spacer(modifier = Modifier.width(spacingMedium))
                     Box(
                         modifier = Modifier
                             .fillMaxHeight()
-                            .padding(start = spacingMedium)
                     ) {
                         Column(
                             verticalArrangement = Arrangement.SpaceAround,
                             horizontalAlignment = Alignment.CenterHorizontally,
-                            modifier = Modifier.fillMaxHeight()
+                            modifier = Modifier
+                                .fillMaxHeight()
+                                .width(40.dp)
                         ) {
-                            Text(text = it.para.start, color = CustomTheme.colors.primaryText)
+                            Text(text = it.para.start, color = CustomTheme.colors.primaryText,
+                                fontWeight = FontWeight.SemiBold)
                             Text(
                                 text = it.para.order.toString(),
-                                color = CustomTheme.colors.secondaryText
+                                color = CustomTheme.colors.secondaryText,
+                                fontWeight = FontWeight.Bold
                             )
-                            Text(text = it.para.end, color = CustomTheme.colors.primaryText)
+                            Text(text = it.para.end, color = CustomTheme.colors.primaryText,
+                                fontSize = 12.sp)
                         }
                     }
                     Spacer(modifier = Modifier.width(spacingMedium))
                     Card(
-                        colors = CardDefaults.cardColors(CustomTheme.colors.secondaryText),
+                        colors = CardDefaults.cardColors(CustomTheme.colors.ghostElement),
                         modifier = Modifier
                             .width(3.dp)
-                            .fillMaxHeight()
-                            .padding(vertical = spacingSmall),
+                            .fillMaxHeight(),
                         shape = RoundedCornerShape(50.dp)
                     ) {}
                     Spacer(modifier = Modifier.width(spacingMedium))
@@ -126,25 +130,18 @@ private fun SubjectsContent(subjects: List<Subject>) {
                         verticalArrangement = Arrangement.SpaceBetween,
                         modifier = Modifier.fillMaxHeight()
                     ) {
-                        Text(text = it.type.paraType, color = getTypeColor(it.type))
+                        Text(text = it.type.paraType, color = getTypeColor(it.type),
+                            fontWeight = FontWeight.Medium)
                         Text(
-                            text = it.discidpline,
+                            text = it.discipline,
                             color = CustomTheme.colors.primaryText,
-                            fontWeight = FontWeight.SemiBold
+                            fontWeight = FontWeight.Bold,
+                            maxLines = 1
                         )
-                        Row() {
-                            Card(
-                                shape = RoundedCornerShape(cornersRadius),
-                                colors = CardDefaults.cardColors(CustomTheme.colors.additionalCard)
-                            ) {
-                                Text(
-                                    modifier = Modifier.padding(horizontal = spacingSmall),
-                                    text = it.room,
-                                    fontSize = 12.sp,
-                                    color = CustomTheme.colors.secondaryText
-                                )
-
-                            }
+                        Row {
+                            AdditionalCard(it.room)
+                            Spacer(modifier = Modifier.width(spacingSmall))
+                            AdditionalCard(it.groups)
                         }
                         Text(
                             text = it.teacher,
@@ -154,8 +151,23 @@ private fun SubjectsContent(subjects: List<Subject>) {
                     }
                 }
             }
-            Spacer(modifier = Modifier.height(spacingMedium))
+            Spacer(modifier = Modifier.height(spacingSmall))
         }
+    }
+}
+
+@Composable
+private fun AdditionalCard(content: String) {
+    Card(
+        shape = RoundedCornerShape(cornersRadius),
+        colors = CardDefaults.cardColors(CustomTheme.colors.additionalCard)
+    ) {
+        Text(
+            modifier = Modifier.padding(horizontal = 5.dp, vertical = 2.dp),
+            text = content,
+            fontSize = 12.sp,
+            color = CustomTheme.colors.secondaryText
+        )
     }
 }
 
@@ -175,15 +187,18 @@ private fun EmptyElement(dow: String) {
         colors = CardDefaults.cardColors(CustomTheme.colors.mainCard),
         modifier = Modifier
             .fillMaxWidth()
-            .height(50.dp + spacingLarge * 2)
     ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.padding(vertical = spacingMedium, horizontal = spacingLarge)
+        ) {
             Image(
                 painter = painterResource(CustomTheme.images.calendar_pic),
                 contentDescription = "icon",
                 contentScale = ContentScale.Inside,
-                modifier = Modifier.padding(spacingMedium*2)
+                modifier = Modifier.size(35.dp)
             )
+            Spacer(modifier = Modifier.width(spacingLarge))
             Column {
                 Text(
                     text = "$dow, пар нет!", color = CustomTheme.colors.primaryText,
@@ -199,7 +214,7 @@ private fun EmptyElement(dow: String) {
 @Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES, name = "Dark mode")
 @Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_NO, name = "Light mode")
 @Composable
-private fun emtyElementPreview() {
+private fun EmptyElementPreview() {
     MainTheme {
         EmptyElement("Суббота")
     }
@@ -214,7 +229,6 @@ private fun Subjects(
         colors = CardDefaults.cardColors(CustomTheme.colors.mainCard),
         modifier = Modifier
             .fillMaxWidth()
-            .height(80.dp * subjects.size + spacingLarge * 2 + spacingMedium * (subjects.size - 1))
     ) {
         SubjectsContent(subjects)
     }
@@ -225,61 +239,92 @@ private fun Subjects(
 @Composable
 private fun PreviewListOfSubjects() {
     MainTheme() {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-        ) {
-            ListOfSubjects(
+        ListOfSubjects(
+            listOf(
                 listOf(
-                    listOf(
-                        Subject(
-                            PariTimes.FIRST,
-                            PariTypes.LABA,
-                            "Алгоритмы и структуры данных",
-                            "Б.М. 52-18",
-                            "4231; 4232; 4233К; 4236",
-                            "Матьяш В.А. — доцент, канд. техн. наук, доцент",
-                            1,
-                            2
-                        ),
-                        Subject(
-                            PariTimes.SECOND,
-                            PariTypes.KURSACH,
-                            "Алгоритмы",
-                            "Гаст. 23-08",
-                            "4232",
-                            "Матьяш В.А. — доцент",
-                            1,
-                            2
-                        )
+                    Subject(
+                        PariTimes.FIRST,
+                        PariTypes.LABA,
+                        "Алгоритмы и структуры данных",
+                        "Б.М. 52-18",
+                        "4231; 4232; 4233К; 4236",
+                        "Матьяш В.А. — доцент, канд. техн. наук, доцент",
+                        1,
+                        2
                     ),
-                    listOf(
-                        Subject(
-                            PariTimes.FIFTH,
-                            PariTypes.LEKCIA,
-                            "Алгоритмы и структуры данных",
-                            "Б.М. 52-18",
-                            "4231; 4232; 4233К; 4236",
-                            "Матьяш В.А. — доцент, канд. техн. наук, доцент",
-                            1,
-                            3
-                        )
-                    ),
-                    listOf(
-                        Subject(
-                            PariTimes.FIRST,
-                            PariTypes.PRAKTIKA,
-                            "Алгоритмы и структуры данных",
-                            "Б.М. 52-18",
-                            "4231; 4232; 4233К; 4236",
-                            "Матьяш В.А. — доцент, канд. техн. наук, доцент",
-                            2,
-                            1
-                        )
+                    Subject(
+                        PariTimes.SECOND,
+                        PariTypes.KURSACH,
+                        "Алгоритмы",
+                        "Гаст. 23-08",
+                        "4232",
+                        "Матьяш В.А. — доцент",
+                        1,
+                        2
                     )
-                )
+                ),
+                listOf(
+                    Subject(
+                        PariTimes.FIFTH,
+                        PariTypes.LEKCIA,
+                        "Алгоритмы и структуры данных",
+                        "Б.М. 52-18",
+                        "4231; 4232; 4233К; 4236",
+                        "Матьяш В.А. — доцент, канд. техн. наук, доцент",
+                        1,
+                        3
+                    )
+                ),
+                listOf(
+                    Subject(
+                        PariTimes.FIRST,
+                        PariTypes.PRAKTIKA,
+                        "Алгоритмы и структуры данных",
+                        "Б.М. 52-18",
+                        "4231; 4232; 4233К; 4236",
+                        "Матьяш В.А. — доцент, канд. техн. наук, доцент",
+                        2,
+                        1
+                    )
+                ),
+                listOf(
+                    Subject(
+                        PariTimes.FIFTH,
+                        PariTypes.LEKCIA,
+                        "Алгоритмы и структуры данных",
+                        "Б.М. 52-18",
+                        "4231; 4232; 4233К; 4236",
+                        "Матьяш В.А. — доцент, канд. техн. наук, доцент",
+                        1,
+                        3
+                    )
+                ),
+                listOf(
+                    Subject(
+                        PariTimes.FIFTH,
+                        PariTypes.LEKCIA,
+                        "Алгоритмы и структуры данных",
+                        "Б.М. 52-18",
+                        "4231; 4232; 4233К; 4236",
+                        "Матьяш В.А. — доцент, канд. техн. наук, доцент",
+                        1,
+                        3
+                    )
+                ),
+                listOf(
+                    Subject(
+                        PariTimes.FIFTH,
+                        PariTypes.LEKCIA,
+                        "Алгоритмы и структуры данных",
+                        "Б.М. 52-18",
+                        "4231; 4232; 4233К; 4236",
+                        "Матьяш В.А. — доцент, канд. техн. наук, доцент",
+                        1,
+                        3
+                    )
+                ),
             )
-        }
+        )
     }
 }
 
@@ -290,6 +335,7 @@ private fun SimpleDateLabel(cwdn: String = curWeekdayName(today), cd: String = c
         modifier = Modifier
             .fillMaxWidth()
             .background(CustomTheme.colors.background)
+            .padding(spacingSmall)
     ) {
         Text(
             text = "${cwdn.replaceFirstChar { it.uppercase() }}, $cd",
@@ -310,6 +356,7 @@ private fun SimpleWeekTypeLabel(
         verticalAlignment = Alignment.CenterVertically, modifier = Modifier
             .fillMaxWidth()
             .background(CustomTheme.colors.background)
+            .padding(spacingSmall)
     ) {
         Card(
             colors = CardDefaults.cardColors(dotColor),
@@ -332,6 +379,7 @@ private fun CombinedDateLabel(cwdn: String = curWeekdayName(today)) {
         modifier = Modifier
             .fillMaxWidth()
             .background(CustomTheme.colors.background)
+            .padding(spacingSmall)
     ) {
         Text(
             text = "${cwdn.replaceFirstChar { it.uppercase() }}, сегодня",
@@ -354,6 +402,7 @@ private fun CombinedWeekTypeLabel(
         modifier = Modifier
             .fillMaxWidth()
             .background(CustomTheme.colors.background)
+            .padding(spacingSmall)
     ) {
         Card(
             colors = CardDefaults.cardColors(dotColor),
@@ -367,6 +416,7 @@ private fun CombinedWeekTypeLabel(
             color = CustomTheme.colors.secondaryText
         )
     }
+
 }
 
 @Composable
@@ -376,6 +426,7 @@ private fun OutOfTheGridLabel() {
         modifier = Modifier
             .fillMaxWidth()
             .background(CustomTheme.colors.background)
+            .padding(spacingSmall)
     ) {
         Text(
             text = "Вне сетки",

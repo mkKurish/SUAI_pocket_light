@@ -9,12 +9,14 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.ui.Modifier
 import com.example.suai_pocket_light.ui.theme.CustomTheme
 import com.example.suai_pocket_light.ui.theme.MainTheme
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
 
-        val subjectsList = DataParser.parseSubjects()
+        val subjectsList = DataParser.parseSubjects(this)
 
         super.onCreate(savedInstanceState)
         setContent {

@@ -1,8 +1,12 @@
 package com.example.suai_pocket_light
 
+import android.content.Context
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
+import android.os.Build
+import android.widget.Toast
 import com.example.suai_pocket_light.TimeUtil.curWeekType
 import com.example.suai_pocket_light.TimeUtil.curWeekday
-import com.example.suai_pocket_light.TimeUtil.curWeekdayName
 import com.example.suai_pocket_light.TimeUtil.today
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.cio.CIO
@@ -12,12 +16,13 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
 
 private const val GUAP_API_URI_BASE = "https://api.guap.ru/rasp/custom/get-sem-rasp/group"
+private const val STORED_SCHEDULE_FILE = "StoredSchedule"
 
 object DataParser {
 
-    fun parseSubjects(): List<List<Subject>> {
+    fun parseSubjects(appContext: Context): List<List<Subject>> {
         val subjects: List<Subject> =
-            getSUAIScheduleList().map { Subject(it) }.sortedBy { it.para.order }.sortedBy { it.day }
+            getSUAIScheduleList(appContext).map { Subject(it) }.sortedBy { it.para.order }.sortedBy { it.day }
                 .sortedBy { it.week }
         val grouppedSubjects: MutableList<MutableList<Subject>> =
             mutableListOf(mutableListOf(subjects[0]))
@@ -55,7 +60,6 @@ object DataParser {
         if (voidGroup.size != 0) shiftedSubjects.add(voidGroup)
 
 
-
         val withEmptySubjects: MutableList<MutableList<Subject>> = mutableListOf()
         var temp = 0
         for (i in curWeekday(today)..7) {
@@ -90,18 +94,47 @@ object DataParser {
         return withEmptySubjects
     }
 
-    private fun getSUAIScheduleList(group: String = "316"): List<SUAIRaspElement> {
+    private fun getSUAIScheduleList(
+        appContext: Context,
+        group: String = "316"
+    ): List<SUAIRaspElement> {
         var raspDays: List<SUAIRaspElement>
-        runBlocking {
-            raspDays = async {
-                Json.decodeFromString<List<SUAIRaspElement>>(getTextApi(group))
-            }.await()
+        if (checkInternet(appContext)) {
+            runBlocking {
+                raspDays = async {
+                    Json.decodeFromString<List<SUAIRaspElement>>(getTextApi(appContext, group))
+                }.await()
+            }
+        }else{
+            Toast.makeText(appContext, "Не удалось обновить расписание", Toast.LENGTH_SHORT)
+            raspDays = Json.decodeFromString<List<SUAIRaspElement>>(getStoredTextApi(appContext))
         }
         return raspDays
     }
 
-    private suspend fun getTextApi(group: String): String {
-        val cl = HttpClient(CIO);
-        return cl.get<String>("$GUAP_API_URI_BASE$group").replace("null", "\"\"")
+    private suspend fun getTextApi(appContext: Context, group: String): String {
+        val cl = HttpClient(CIO)
+        val fileContents = cl.get<String>("$GUAP_API_URI_BASE$group").replace("null", "\"\"")
+        appContext.openFileOutput(STORED_SCHEDULE_FILE, Context.MODE_PRIVATE).use {
+            it.write(fileContents.toByteArray())
+        }
+        return fileContents
+    }
+
+    private fun getStoredTextApi(ctxt: Context): String {
+        val cl = HttpClient(CIO)
+        return ctxt.openFileInput(STORED_SCHEDULE_FILE).bufferedReader().readText()
+    }
+
+    private fun checkInternet(appContext: Context): Boolean {
+        val connectivityManager =
+            appContext.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val network = connectivityManager.activeNetwork ?: return false
+        val activeNetwork = connectivityManager.getNetworkCapabilities(network) ?: return false
+        return when {
+            activeNetwork.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) -> true
+            activeNetwork.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) -> true
+            else -> false
+        }
     }
 }

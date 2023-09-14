@@ -6,7 +6,7 @@ import com.example.suai_pocket_light.PariTypes.Companion.setParaType
 data class Subject(
     val para: PariTimes,
     val type: PariTypes,
-    val discidpline: String,
+    val discipline: String,
     val room: String,
     val groups: String,
     val teacher: String,
@@ -19,7 +19,7 @@ data class Subject(
         schedule.Disc,
         roomsParser(schedule.Rooms, schedule.Build),
         groupsParser(schedule.GroupsText),
-        schedule.PrepsText,
+        if (schedule.PrepsText == "") "Преподаватель не указан" else schedule.PrepsText,
         schedule.Week,
         schedule.Day
     )
@@ -33,8 +33,8 @@ data class Subject(
             else -> "--- $rms"
         }
 
-        // ":315::316::317::318:" -> ["315", "316", "317", "318"]
-        private fun groupsParser(grps: String) = grps.drop(1).dropLast(1).replace("::", " ")
+        // "315; 316; 317; 318" -> "315 | 316 | 317 | 318"
+        private fun groupsParser(grps: String) = grps.replace("; ", " | ")
     }
 
 }

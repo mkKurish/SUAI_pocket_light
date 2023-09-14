@@ -10,15 +10,16 @@ import androidx.compose.ui.unit.dp
 import com.example.suai_pocket_light.R
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 
-val spacingSmall: Dp = 5.dp
+val spacingSmall: Dp = 4.dp
 val spacingMedium: Dp = 10.dp
-val spacingLarge: Dp = 15.dp
+val spacingLarge: Dp = 20.dp
 
-val cornersRadius: Dp = 10.dp
+val cornersRadius: Dp = 15.dp
 
 data class CustomColors(
     val primaryText: Color,
     val secondaryText: Color,
+    val ghostElement: Color,
     val labText: Color,
     val praktText: Color,
     val lekcText: Color,
@@ -33,27 +34,29 @@ data class CustomColors(
 fun customDarkColors() = CustomColors(
     primaryText = Color(0xFFFFFFFF),
     secondaryText = Color(0xFF999999),
-    labText = Color(0xFF17B2E5),
-    praktText = Color(0xFFE5780B),
-    lekcText = Color(0xFF9130F2),
-    kursText = Color(0xFF21991F),
-    oddWeek = Color(0xFFE52E5A),
-    evenWeek = Color(0xFF322EE5),
-    background = Color(0xFF222222),
-    mainCard = Color(0xFF2A2A2A),
-    additionalCard = Color(0xFF404040)
+    ghostElement = Color(0xFF595959),
+    labText = Color(0xFF00BCD4),
+    praktText = Color(0xFFFF9800),
+    lekcText = Color(0xFF9C27B0),
+    kursText = Color(0xFF4CAF50),
+    oddWeek = Color(0xFFF44336),
+    evenWeek = Color(0xFF2196F3),
+    background = Color(0xFF0A0A0A),
+    mainCard = Color(0xFF191919),
+    additionalCard = Color(0xFF292929)
 )
 
 fun customLightColors() = CustomColors(
     primaryText = Color(0xFF000000),
     secondaryText = Color(0xFF888888),
-    labText = Color(0xFF0099CC),
-    praktText = Color(0xFFE57300),
-    lekcText = Color(0xFF8000FF),
-    kursText = Color(0xFF04B200),
-    oddWeek = Color(0xFFB9002C),
-    evenWeek = Color(0xFF0400B9),
-    background = Color(0xFFF2F2F2),
+    ghostElement = Color(0xFFCCCCCC),
+    labText = Color(0xFF039BE5),
+    praktText = Color(0xFFFB8C00),
+    lekcText = Color(0xFF8E24AA),
+    kursText = Color(0xFF43A047),
+    oddWeek = Color(0xFFE53935),
+    evenWeek = Color(0xFF1E88E5),
+    background = Color(0xFFECEDF0),
     mainCard = Color(0xFFFFFFFF),
     additionalCard = Color(0xFFEEEEEE)
 )
