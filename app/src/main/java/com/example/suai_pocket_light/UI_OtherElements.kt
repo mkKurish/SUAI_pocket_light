@@ -47,7 +47,7 @@ fun SUAILogo(logoSize: Dp) {
         ), label = ""
     )
     val fknColor = CustomTheme.colors.background
-    Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+    Box(contentAlignment = Alignment.Center) {
         Box(modifier = Modifier
             .size(logoSize)
             .padding(0.05f * logoSize)

@@ -9,8 +9,11 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.example.suai_pocket_light.ui.theme.CustomTheme
 import com.example.suai_pocket_light.ui.theme.MainTheme
@@ -31,19 +34,14 @@ class MainActivity : ComponentActivity() {
                         .fillMaxSize()
                         .background(color = CustomTheme.colors.background)
                 ) {
-                    Row(horizontalArrangement = Arrangement.SpaceBetween){
+                    Row(modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.Center,
+                        verticalAlignment = Alignment.CenterVertically){
                         SUAILogo(25.dp)
-
+                        GroupLabel(content = "4232")
                     }
                     ListOfSubjects(subjectsList)
                 }
-//                Box(
-//                    modifier = Modifier
-//                        .fillMaxSize()
-//                        .background(color = CustomTheme.colors.background)
-//                ){
-//                    ListOfSubjects(subjectsList)
-//                }
             }
         }
     }

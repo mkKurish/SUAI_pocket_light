@@ -22,7 +22,8 @@ object DataParser {
 
     fun parseSubjects(appContext: Context): List<List<Subject>> {
         val subjects: List<Subject> =
-            getSUAIScheduleList(appContext).map { Subject(it) }.sortedBy { it.para.order }.sortedBy { it.day }
+            getSUAIScheduleList(appContext).map { Subject(it) }.sortedBy { it.para.order }
+                .sortedBy { it.day }
                 .sortedBy { it.week } // Getting sorted lessons
         val grouppedSubjects: MutableList<MutableList<Subject>> =
             mutableListOf(mutableListOf(subjects[0]))
@@ -37,7 +38,8 @@ object DataParser {
             }
         }
 
-        val shiftedSubjects: MutableList<MutableList<Subject>> = mutableListOf() // Shifting list, so first day will be today
+        val shiftedSubjects: MutableList<MutableList<Subject>> =
+            mutableListOf() // Shifting list, so first day will be today
         var indInsertion: Int = grouppedSubjects.size
         var voidGroup: MutableList<Subject> = mutableListOf()
         for (group in grouppedSubjects) {
@@ -57,10 +59,9 @@ object DataParser {
             else
                 shiftedSubjects.add(grouppedSubjects[i])
         }
-        if (voidGroup.size != 0) shiftedSubjects.add(voidGroup)
 
-
-        val withEmptySubjects: MutableList<MutableList<Subject>> = mutableListOf() // Adding empty objects for days with zero lessons
+        val withEmptySubjects: MutableList<MutableList<Subject>> =
+            mutableListOf() // Adding empty objects for days with zero lessons
         var temp = 0
         for (i in curWeekday(today)..7) {
             if (temp < shiftedSubjects.size) {
@@ -89,7 +90,7 @@ object DataParser {
                     withEmptySubjects.add(mutableListOf())
             }
         }
-
+        if (voidGroup.size != 0) withEmptySubjects.add(voidGroup)
 
         return withEmptySubjects
     }
@@ -105,7 +106,7 @@ object DataParser {
                     Json.decodeFromString<List<SUAIRaspElement>>(getTextApi(appContext, group))
                 }.await()
             }
-        }else{
+        } else {
             Toast.makeText(appContext, "Не удалось обновить расписание", Toast.LENGTH_SHORT).show()
             raspDays = Json.decodeFromString<List<SUAIRaspElement>>(getStoredTextApi(appContext))
         }
@@ -126,12 +127,17 @@ object DataParser {
         return appContext.openFileInput(STORED_SCHEDULE_FILE).bufferedReader().readText()
     }
 
-    suspend fun getGroups(appContext: Context): List<String> {
+    fun getGroups(appContext: Context): List<Group> {
+        var receive: List<Group> = listOf()
         if (checkInternet(appContext)) {
             val cl = HttpClient(CIO)
-            return cl.get(GUAP_API_URI_GROUPS)
-        } else Toast.makeText(appContext, "Не удалось обновить расписание", Toast.LENGTH_SHORT).show()
-        return listOf()
+            runBlocking {
+                receive =
+                    async { Json.decodeFromString<List<Group>>(cl.get<String>(GUAP_API_URI_GROUPS)) }.await()
+            }
+        } else Toast.makeText(appContext, "Не удалось обновить расписание", Toast.LENGTH_SHORT)
+            .show()
+        return receive
     }
 
     private fun checkInternet(appContext: Context): Boolean {
