@@ -1,6 +1,13 @@
 package com.example.suai_pocket_light
 
 import android.content.res.Configuration
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -21,14 +28,24 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.drawscope.Fill
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.unit.times
 import com.example.suai_pocket_light.PariTypes.Companion.getTypeColor
 import com.example.suai_pocket_light.TimeUtil.curDay
 import com.example.suai_pocket_light.TimeUtil.curWeekType
@@ -85,6 +102,29 @@ fun ListOfSubjects(subjectsList: List<List<Subject>>) {
 }
 
 @Composable
+private fun SubjectsListElement(subjects: List<Subject>, dow: String = "NONE") {
+    if (subjects.isEmpty()) {
+        EmptyElement(dow)
+    } else {
+        Subjects(subjects)
+    }
+}
+
+@Composable
+private fun Subjects(
+    subjects: List<Subject>
+) {
+    Card(
+        shape = RoundedCornerShape(cornersRadius),
+        colors = CardDefaults.cardColors(CustomTheme.colors.mainCard),
+        modifier = Modifier
+            .fillMaxWidth()
+    ) {
+        SubjectsContent(subjects)
+    }
+}
+
+@Composable
 private fun SubjectsContent(subjects: List<Subject>) {
     Column(modifier = Modifier.padding(spacingMedium)) {
         subjects.forEach {
@@ -106,15 +146,19 @@ private fun SubjectsContent(subjects: List<Subject>) {
                                 .fillMaxHeight()
                                 .width(40.dp)
                         ) {
-                            Text(text = it.para.start, color = CustomTheme.colors.primaryText,
-                                fontWeight = FontWeight.SemiBold)
+                            Text(
+                                text = it.para.start, color = CustomTheme.colors.primaryText,
+                                fontWeight = FontWeight.SemiBold
+                            )
                             Text(
                                 text = it.para.order.toString(),
                                 color = CustomTheme.colors.secondaryText,
                                 fontWeight = FontWeight.Bold
                             )
-                            Text(text = it.para.end, color = CustomTheme.colors.primaryText,
-                                fontSize = 12.sp)
+                            Text(
+                                text = it.para.end, color = CustomTheme.colors.primaryText,
+                                fontSize = 12.sp
+                            )
                         }
                     }
                     Spacer(modifier = Modifier.width(spacingMedium))
@@ -130,8 +174,10 @@ private fun SubjectsContent(subjects: List<Subject>) {
                         verticalArrangement = Arrangement.SpaceBetween,
                         modifier = Modifier.fillMaxHeight()
                     ) {
-                        Text(text = it.type.paraType, color = getTypeColor(it.type),
-                            fontWeight = FontWeight.Medium)
+                        Text(
+                            text = it.type.paraType, color = getTypeColor(it.type),
+                            fontWeight = FontWeight.Medium
+                        )
                         Text(
                             text = it.discipline,
                             color = CustomTheme.colors.primaryText,
@@ -172,15 +218,6 @@ private fun AdditionalCard(content: String) {
 }
 
 @Composable
-private fun SubjectsListElement(subjects: List<Subject>, dow: String = "NONE") {
-    if (subjects.isEmpty()) {
-        EmptyElement(dow)
-    } else {
-        Subjects(subjects)
-    }
-}
-
-@Composable
 private fun EmptyElement(dow: String) {
     Card(
         shape = RoundedCornerShape(cornersRadius),
@@ -208,29 +245,6 @@ private fun EmptyElement(dow: String) {
                 Text(text = "Можно спать спокойно!", color = CustomTheme.colors.secondaryText)
             }
         }
-    }
-}
-
-@Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES, name = "Dark mode")
-@Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_NO, name = "Light mode")
-@Composable
-private fun EmptyElementPreview() {
-    MainTheme {
-        EmptyElement("Суббота")
-    }
-}
-
-@Composable
-private fun Subjects(
-    subjects: List<Subject>
-) {
-    Card(
-        shape = RoundedCornerShape(cornersRadius),
-        colors = CardDefaults.cardColors(CustomTheme.colors.mainCard),
-        modifier = Modifier
-            .fillMaxWidth()
-    ) {
-        SubjectsContent(subjects)
     }
 }
 
@@ -266,31 +280,20 @@ private fun PreviewListOfSubjects() {
                 listOf(
                     Subject(
                         PariTimes.FIFTH,
-                        PariTypes.LEKCIA,
-                        "Алгоритмы и структуры данных",
-                        "Б.М. 52-18",
-                        "4231; 4232; 4233К; 4236",
-                        "Матьяш В.А. — доцент, канд. техн. наук, доцент",
-                        1,
-                        3
-                    )
-                ),
-                listOf(
-                    Subject(
-                        PariTimes.FIRST,
                         PariTypes.PRAKTIKA,
                         "Алгоритмы и структуры данных",
                         "Б.М. 52-18",
                         "4231; 4232; 4233К; 4236",
                         "Матьяш В.А. — доцент, канд. техн. наук, доцент",
-                        2,
-                        1
+                        1,
+                        3
                     )
                 ),
+                listOf(),
                 listOf(
                     Subject(
-                        PariTimes.FIFTH,
-                        PariTypes.LEKCIA,
+                        PariTimes.FOURTH,
+                        PariTypes.LABA,
                         "Алгоритмы и структуры данных",
                         "Б.М. 52-18",
                         "4231; 4232; 4233К; 4236",
@@ -301,7 +304,7 @@ private fun PreviewListOfSubjects() {
                 ),
                 listOf(
                     Subject(
-                        PariTimes.FIFTH,
+                        PariTimes.SIXTH,
                         PariTypes.LEKCIA,
                         "Алгоритмы и структуры данных",
                         "Б.М. 52-18",
@@ -310,23 +313,12 @@ private fun PreviewListOfSubjects() {
                         1,
                         3
                     )
-                ),
-                listOf(
-                    Subject(
-                        PariTimes.FIFTH,
-                        PariTypes.LEKCIA,
-                        "Алгоритмы и структуры данных",
-                        "Б.М. 52-18",
-                        "4231; 4232; 4233К; 4236",
-                        "Матьяш В.А. — доцент, канд. техн. наук, доцент",
-                        1,
-                        3
-                    )
-                ),
+                )
             )
         )
     }
 }
+
 
 @Composable
 private fun SimpleDateLabel(cwdn: String = curWeekdayName(today), cd: String = curDay(today)) {

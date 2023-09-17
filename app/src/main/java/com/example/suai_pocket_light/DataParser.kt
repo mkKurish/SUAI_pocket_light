@@ -3,7 +3,6 @@ package com.example.suai_pocket_light
 import android.content.Context
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
-import android.os.Build
 import android.widget.Toast
 import com.example.suai_pocket_light.TimeUtil.curWeekType
 import com.example.suai_pocket_light.TimeUtil.curWeekday
@@ -16,6 +15,7 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
 
 private const val GUAP_API_URI_BASE = "https://api.guap.ru/rasp/custom/get-sem-rasp/group"
+private const val GUAP_API_URI_GROUPS = "https://api.guap.ru/rasp/custom/get-sem-groups"
 private const val STORED_SCHEDULE_FILE = "StoredSchedule"
 
 object DataParser {
@@ -23,11 +23,11 @@ object DataParser {
     fun parseSubjects(appContext: Context): List<List<Subject>> {
         val subjects: List<Subject> =
             getSUAIScheduleList(appContext).map { Subject(it) }.sortedBy { it.para.order }.sortedBy { it.day }
-                .sortedBy { it.week }
+                .sortedBy { it.week } // Getting sorted lessons
         val grouppedSubjects: MutableList<MutableList<Subject>> =
             mutableListOf(mutableListOf(subjects[0]))
         var ind = 0
-        for (i in 1..<subjects.size) {
+        for (i in 1..<subjects.size) { // Grouping lessons by days
             if (subjects[i].day == subjects[i - 1].day && subjects[i].week == subjects[i - 1].week) grouppedSubjects[ind].add(
                 subjects[i]
             )
@@ -37,7 +37,7 @@ object DataParser {
             }
         }
 
-        val shiftedSubjects: MutableList<MutableList<Subject>> = mutableListOf()
+        val shiftedSubjects: MutableList<MutableList<Subject>> = mutableListOf() // Shifting list, so first day will be today
         var indInsertion: Int = grouppedSubjects.size
         var voidGroup: MutableList<Subject> = mutableListOf()
         for (group in grouppedSubjects) {
@@ -60,7 +60,7 @@ object DataParser {
         if (voidGroup.size != 0) shiftedSubjects.add(voidGroup)
 
 
-        val withEmptySubjects: MutableList<MutableList<Subject>> = mutableListOf()
+        val withEmptySubjects: MutableList<MutableList<Subject>> = mutableListOf() // Adding empty objects for days with zero lessons
         var temp = 0
         for (i in curWeekday(today)..7) {
             if (temp < shiftedSubjects.size) {
@@ -106,7 +106,7 @@ object DataParser {
                 }.await()
             }
         }else{
-            Toast.makeText(appContext, "Не удалось обновить расписание", Toast.LENGTH_SHORT)
+            Toast.makeText(appContext, "Не удалось обновить расписание", Toast.LENGTH_SHORT).show()
             raspDays = Json.decodeFromString<List<SUAIRaspElement>>(getStoredTextApi(appContext))
         }
         return raspDays
@@ -121,9 +121,17 @@ object DataParser {
         return fileContents
     }
 
-    private fun getStoredTextApi(ctxt: Context): String {
+    private fun getStoredTextApi(appContext: Context): String {
         val cl = HttpClient(CIO)
-        return ctxt.openFileInput(STORED_SCHEDULE_FILE).bufferedReader().readText()
+        return appContext.openFileInput(STORED_SCHEDULE_FILE).bufferedReader().readText()
+    }
+
+    suspend fun getGroups(appContext: Context): List<String> {
+        if (checkInternet(appContext)) {
+            val cl = HttpClient(CIO)
+            return cl.get(GUAP_API_URI_GROUPS)
+        } else Toast.makeText(appContext, "Не удалось обновить расписание", Toast.LENGTH_SHORT).show()
+        return listOf()
     }
 
     private fun checkInternet(appContext: Context): Boolean {
