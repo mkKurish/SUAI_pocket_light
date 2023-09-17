@@ -2,6 +2,7 @@ package com.example.suai_pocket_light
 
 import android.content.Context
 import android.content.res.Configuration
+import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -30,6 +31,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.suai_pocket_light.DataParser.checkInternet
 import com.example.suai_pocket_light.DataParser.setPrefGroup
 import com.example.suai_pocket_light.ui.theme.CustomTheme
 import com.example.suai_pocket_light.ui.theme.MainTheme
@@ -75,7 +77,7 @@ private fun GroupLabelPreview() {
 @Composable
 fun SelectingGroupDialog(appContext: Context, groups: List<Group>) {
     val interactionSource = remember { MutableInteractionSource() }
-    var userGroupState = remember { mutableStateOf("") }
+    val userGroupState = remember { mutableStateOf("") }
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -133,9 +135,11 @@ fun SelectingGroupDialog(appContext: Context, groups: List<Group>) {
 @Composable
 private fun GroupDialogItem(content: Group, appContext: Context) {
     Card(onClick = {
-        requiredGroup = content
-        runBlocking { launch { setPrefGroup(appContext) } }
-        subjectsList = DataParser.parseSubjects(appContext)
+        if (checkInternet(appContext)){
+            requiredGroup = content
+            runBlocking { launch { setPrefGroup(appContext) } }
+            subjectsList = DataParser.parseSubjects(appContext)
+        }else Toast.makeText(appContext, "Интернет-соединение пропало", Toast.LENGTH_SHORT).show()
         showFilter.value = false
     }, colors = CardDefaults.cardColors(CustomTheme.colors.mainCard)) {
         Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {

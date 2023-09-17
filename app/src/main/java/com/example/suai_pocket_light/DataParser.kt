@@ -1,12 +1,10 @@
 package com.example.suai_pocket_light
 
-import android.app.Activity
 import android.content.Context
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.widget.Toast
 import androidx.datastore.core.DataStore
-import androidx.datastore.dataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
@@ -26,7 +24,6 @@ import kotlinx.serialization.json.Json
 private const val GUAP_API_URI_BASE = "https://api.guap.ru/rasp/custom/get-sem-rasp/group"
 private const val GUAP_API_URI_GROUPS = "https://api.guap.ru/rasp/custom/get-sem-groups"
 private const val STORED_SCHEDULE_FILE = "StoredSchedule"
-private const val SHARED_PREFERENCES = "prefs"
 val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "settings")
 
 object DataParser {
@@ -133,7 +130,6 @@ object DataParser {
     }
 
     private fun getStoredTextApi(appContext: Context): String {
-        val cl = HttpClient(CIO)
         return appContext.openFileInput(STORED_SCHEDULE_FILE).bufferedReader().readText()
     }
 
@@ -150,7 +146,7 @@ object DataParser {
         return receive
     }
 
-    private fun checkInternet(appContext: Context): Boolean {
+    fun checkInternet(appContext: Context): Boolean {
         val connectivityManager =
             appContext.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
         val network = connectivityManager.activeNetwork ?: return false
