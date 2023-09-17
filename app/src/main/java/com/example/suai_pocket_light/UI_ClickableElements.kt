@@ -73,8 +73,7 @@ private fun GroupLabelPreview() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SelectingGroupDialog(appContext: Context) {
-    val groups = DataParser.getGroups(appContext)
+fun SelectingGroupDialog(appContext: Context, groups: List<Group>) {
     val interactionSource = remember { MutableInteractionSource() }
     var userGroupState = remember { mutableStateOf("") }
     Box(

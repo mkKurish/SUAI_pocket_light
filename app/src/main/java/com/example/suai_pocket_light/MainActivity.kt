@@ -37,6 +37,9 @@ var subjectsList: List<List<Subject>> = listOf()
 class MainActivity : ComponentActivity() {
     @OptIn(ExperimentalAnimationApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
+
+        val groups = DataParser.getGroups(this)
+
         runBlocking { launch { usePrefGroup(this@MainActivity) } }
         super.onCreate(savedInstanceState)
         setContent {
@@ -52,7 +55,7 @@ class MainActivity : ComponentActivity() {
                     ListOfSubjects(subjectsList)
                 }
                 AnimatedVisibility(visible = showFilter.value, enter = scaleIn() + fadeIn(), exit = scaleOut() + fadeOut()) {
-                    SelectingGroupDialog(this@MainActivity)
+                    SelectingGroupDialog(this@MainActivity, groups)
                 }
             }
         }
