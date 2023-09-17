@@ -52,6 +52,7 @@ android {
 
 dependencies {
 
+    implementation("androidx.datastore:datastore-preferences:1.0.0")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.0")
     implementation("io.ktor:ktor-client-core:1.6.2")
     implementation("io.ktor:ktor-client-cio:1.6.2")

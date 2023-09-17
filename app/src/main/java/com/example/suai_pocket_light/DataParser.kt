@@ -1,9 +1,17 @@
 package com.example.suai_pocket_light
 
+import android.app.Activity
 import android.content.Context
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.widget.Toast
+import androidx.datastore.core.DataStore
+import androidx.datastore.dataStore
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.intPreferencesKey
+import androidx.datastore.preferences.core.stringPreferencesKey
+import androidx.datastore.preferences.preferencesDataStore
 import com.example.suai_pocket_light.TimeUtil.curWeekType
 import com.example.suai_pocket_light.TimeUtil.curWeekday
 import com.example.suai_pocket_light.TimeUtil.today
@@ -11,12 +19,15 @@ import io.ktor.client.HttpClient
 import io.ktor.client.engine.cio.CIO
 import io.ktor.client.request.get
 import kotlinx.coroutines.async
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
 
 private const val GUAP_API_URI_BASE = "https://api.guap.ru/rasp/custom/get-sem-rasp/group"
 private const val GUAP_API_URI_GROUPS = "https://api.guap.ru/rasp/custom/get-sem-groups"
 private const val STORED_SCHEDULE_FILE = "StoredSchedule"
+private const val SHARED_PREFERENCES = "prefs"
+val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "settings")
 
 object DataParser {
 
@@ -96,14 +107,13 @@ object DataParser {
     }
 
     private fun getSUAIScheduleList(
-        appContext: Context,
-        group: String = "316"
+        appContext: Context
     ): List<SUAIRaspElement> {
         var raspDays: List<SUAIRaspElement>
         if (checkInternet(appContext)) {
             runBlocking {
                 raspDays = async {
-                    Json.decodeFromString<List<SUAIRaspElement>>(getTextApi(appContext, group))
+                    Json.decodeFromString<List<SUAIRaspElement>>(getTextApi(appContext))
                 }.await()
             }
         } else {
@@ -113,9 +123,9 @@ object DataParser {
         return raspDays
     }
 
-    private suspend fun getTextApi(appContext: Context, group: String): String {
+    private suspend fun getTextApi(appContext: Context): String {
         val cl = HttpClient(CIO)
-        val fileContents = cl.get<String>("$GUAP_API_URI_BASE$group").replace("null", "\"\"")
+        val fileContents = cl.get<String>("$GUAP_API_URI_BASE${requiredGroup.ItemId}").replace("null", "\"\"")
         appContext.openFileOutput(STORED_SCHEDULE_FILE, Context.MODE_PRIVATE).use {
             it.write(fileContents.toByteArray())
         }
@@ -135,7 +145,7 @@ object DataParser {
                 receive =
                     async { Json.decodeFromString<List<Group>>(cl.get<String>(GUAP_API_URI_GROUPS)) }.await()
             }
-        } else Toast.makeText(appContext, "Не удалось обновить расписание", Toast.LENGTH_SHORT)
+        } else Toast.makeText(appContext, "Не удалось получить список групп", Toast.LENGTH_SHORT)
             .show()
         return receive
     }
@@ -149,6 +159,23 @@ object DataParser {
             activeNetwork.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) -> true
             activeNetwork.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) -> true
             else -> false
+        }
+    }
+
+    suspend fun usePrefGroup(appContext: Context){
+        val dsIDk = intPreferencesKey("GroupId")
+        val dsNamek = stringPreferencesKey("GroupName")
+        val preferences = appContext.dataStore.data.first()
+        requiredGroup = Group(preferences[dsNamek]?:"Выбор группы", preferences[dsIDk]?:1)
+        subjectsList = parseSubjects(appContext)
+    }
+
+    suspend fun setPrefGroup(appContext: Context){
+        val dsIDk = intPreferencesKey("GroupId")
+        val dsNamek = stringPreferencesKey("GroupName")
+        appContext.dataStore.edit {
+            it[dsIDk] = requiredGroup.ItemId
+            it[dsNamek] = requiredGroup.Name
         }
     }
 }

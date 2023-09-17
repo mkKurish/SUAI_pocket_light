@@ -27,7 +27,7 @@ import androidx.compose.ui.unit.times
 import com.example.suai_pocket_light.ui.theme.CustomTheme
 
 @Composable
-fun SUAILogo(logoSize: Dp) {
+fun SUAILogo(logoSize: Dp, fknColor: Color) {
     val fAngleState = rememberInfiniteTransition(label = "")
     val sAngleState = rememberInfiniteTransition(label = "")
     val fAngle by fAngleState.animateFloat(
@@ -46,7 +46,6 @@ fun SUAILogo(logoSize: Dp) {
             repeatMode = RepeatMode.Reverse
         ), label = ""
     )
-    val fknColor = CustomTheme.colors.background
     Box(contentAlignment = Alignment.Center) {
         Box(modifier = Modifier
             .size(logoSize)

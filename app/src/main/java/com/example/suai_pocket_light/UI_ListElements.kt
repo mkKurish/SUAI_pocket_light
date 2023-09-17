@@ -65,7 +65,7 @@ import com.example.suai_pocket_light.ui.theme.spacingSmall
 fun ListOfSubjects(subjectsList: List<List<Subject>>) {
     LazyColumn(
         modifier = Modifier
-            .padding(horizontal = spacingMedium, vertical = spacingSmall)
+            .padding(horizontal = spacingMedium)
     ) {
         stickyHeader {
             CombinedWeekTypeLabel()
@@ -212,7 +212,8 @@ private fun AdditionalCard(content: String) {
             modifier = Modifier.padding(horizontal = 5.dp, vertical = 2.dp),
             text = content,
             fontSize = 12.sp,
-            color = CustomTheme.colors.secondaryText
+            color = CustomTheme.colors.secondaryText,
+            maxLines = 1
         )
     }
 }
