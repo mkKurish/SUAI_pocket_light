@@ -1,10 +1,9 @@
-package com.example.suai_pocket_light
+package com.example.suai_pocket_light.utils
 
 import android.annotation.SuppressLint
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
-import java.util.Locale
 
 object TimeUtil {
     val today: Calendar = run {
@@ -20,14 +19,6 @@ object TimeUtil {
             1
         )
         temp
-    }
-
-    @SuppressLint("SimpleDateFormat")
-    fun printAllDate(calInst: Calendar){
-        println(SimpleDateFormat("H:m:S d.MMMM.y").format(Date(calInst.timeInMillis)))
-        println("curWeekType = ${curWeekType(calInst)} (${curWeekTypeName(calInst)})")
-        println("curDay = ${curDay(calInst)}")
-        println("curWeekdayName = ${curWeekdayName(calInst)} (${curWeekday(calInst)})")
     }
 
     fun curWeekType(calInst: Calendar): Byte =

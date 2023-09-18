@@ -1,4 +1,4 @@
-package com.example.suai_pocket_light
+package com.example.suai_pocket_light.structures
 
 import kotlinx.serialization.Serializable
 

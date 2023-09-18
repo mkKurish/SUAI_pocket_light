@@ -1,4 +1,4 @@
-package com.example.suai_pocket_light
+package com.example.suai_pocket_light.structures
 
 enum class PariTimes(val start: String, val end: String, val order: Byte) {
     FIRST("9:30", "11:00", 1),

@@ -1,7 +1,7 @@
-package com.example.suai_pocket_light
+package com.example.suai_pocket_light.structures
 
-import com.example.suai_pocket_light.PariTimes.Companion.setParaTime
-import com.example.suai_pocket_light.PariTypes.Companion.setParaType
+import com.example.suai_pocket_light.structures.PariTimes.Companion.setParaTime
+import com.example.suai_pocket_light.structures.PariTypes.Companion.setParaType
 
 data class Subject(
     val para: PariTimes,

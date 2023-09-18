@@ -1,7 +1,6 @@
-package com.example.suai_pocket_light
+package com.example.suai_pocket_light.structures
 
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.graphics.Color
 import com.example.suai_pocket_light.ui.theme.CustomTheme
 
 enum class PariTypes(val paraType: String) {

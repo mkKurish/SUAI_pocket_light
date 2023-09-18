@@ -1,13 +1,6 @@
 package com.example.suai_pocket_light
 
 import android.content.res.Configuration
-import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.RepeatMode
-import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.rememberInfiniteTransition
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -28,41 +21,34 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.drawscope.Fill
-import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.unit.times
-import com.example.suai_pocket_light.PariTypes.Companion.getTypeColor
-import com.example.suai_pocket_light.TimeUtil.curDay
-import com.example.suai_pocket_light.TimeUtil.curWeekType
-import com.example.suai_pocket_light.TimeUtil.curWeekTypeName
-import com.example.suai_pocket_light.TimeUtil.curWeekdayName
-import com.example.suai_pocket_light.TimeUtil.nextDay
-import com.example.suai_pocket_light.TimeUtil.today
+import com.example.suai_pocket_light.structures.PariTimes
+import com.example.suai_pocket_light.structures.PariTypes
+import com.example.suai_pocket_light.structures.PariTypes.Companion.getTypeColor
+import com.example.suai_pocket_light.structures.Subject
 import com.example.suai_pocket_light.ui.theme.CustomTheme
 import com.example.suai_pocket_light.ui.theme.MainTheme
 import com.example.suai_pocket_light.ui.theme.cornersRadius
 import com.example.suai_pocket_light.ui.theme.spacingLarge
 import com.example.suai_pocket_light.ui.theme.spacingMedium
 import com.example.suai_pocket_light.ui.theme.spacingSmall
+import com.example.suai_pocket_light.utils.TimeUtil.curDay
+import com.example.suai_pocket_light.utils.TimeUtil.curWeekType
+import com.example.suai_pocket_light.utils.TimeUtil.curWeekTypeName
+import com.example.suai_pocket_light.utils.TimeUtil.curWeekdayName
+import com.example.suai_pocket_light.utils.TimeUtil.nextDay
+import com.example.suai_pocket_light.utils.TimeUtil.today
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun ListOfSubjects(subjectsList: List<List<Subject>>) {
+fun ListOfSubjects(currentList: List<List<Subject>>) {
     LazyColumn(
         modifier = Modifier
             .padding(horizontal = spacingMedium)
@@ -70,12 +56,12 @@ fun ListOfSubjects(subjectsList: List<List<Subject>>) {
         stickyHeader {
             CombinedWeekTypeLabel()
         }
-        if (subjectsList.isNotEmpty()) {
+        if (currentList.isNotEmpty()) {
             item {
                 CombinedDateLabel()
-                SubjectsListElement(subjectsList[0], curWeekdayName(nextDay(0)))
+                SubjectsListElement(currentList[0], curWeekdayName(nextDay(0)))
             }
-            for (i in 1..<subjectsList.size) {
+            for (i in 1..<currentList.size) {
                 if (curWeekType(nextDay(i)) != curWeekType(nextDay(i - 1))) {
                     stickyHeader {
                         SimpleWeekTypeLabel(
@@ -85,8 +71,8 @@ fun ListOfSubjects(subjectsList: List<List<Subject>>) {
                     }
                 }
                 item {
-                    if (subjectsList[i].isNotEmpty()) {
-                        if (subjectsList[i][0].para.order == 0.toByte()) {
+                    if (currentList[i].isNotEmpty()) {
+                        if (currentList[i][0].para.order == 0.toByte()) {
                             OutOfTheGridLabel()
                         } else {
                             SimpleDateLabel(curWeekdayName(nextDay(i)), curDay(nextDay(i)))
@@ -94,7 +80,7 @@ fun ListOfSubjects(subjectsList: List<List<Subject>>) {
                     } else {
                         SimpleDateLabel(curWeekdayName(nextDay(i)), curDay(nextDay(i)))
                     }
-                    SubjectsListElement(subjectsList[i], curWeekdayName(nextDay(i)))
+                    SubjectsListElement(currentList[i], curWeekdayName(nextDay(i)))
                 }
             }
         }

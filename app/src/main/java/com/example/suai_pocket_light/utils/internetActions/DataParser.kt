@@ -1,8 +1,6 @@
-package com.example.suai_pocket_light
+package com.example.suai_pocket_light.utils.internetActions
 
 import android.content.Context
-import android.net.ConnectivityManager
-import android.net.NetworkCapabilities
 import android.widget.Toast
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
@@ -10,9 +8,14 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
-import com.example.suai_pocket_light.TimeUtil.curWeekType
-import com.example.suai_pocket_light.TimeUtil.curWeekday
-import com.example.suai_pocket_light.TimeUtil.today
+import com.example.suai_pocket_light.structures.Group
+import com.example.suai_pocket_light.structures.SUAIRaspElement
+import com.example.suai_pocket_light.structures.Subject
+import com.example.suai_pocket_light.utils.TimeUtil.curWeekType
+import com.example.suai_pocket_light.utils.TimeUtil.curWeekday
+import com.example.suai_pocket_light.utils.TimeUtil.today
+import com.example.suai_pocket_light.requiredGroup
+import com.example.suai_pocket_light.subjectsList
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.cio.CIO
 import io.ktor.client.request.get
@@ -21,12 +24,12 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
 
-private const val GUAP_API_URI_BASE = "https://api.guap.ru/rasp/custom/get-sem-rasp/group"
-private const val GUAP_API_URI_GROUPS = "https://api.guap.ru/rasp/custom/get-sem-groups"
-private const val STORED_SCHEDULE_FILE = "StoredSchedule"
-val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "settings")
-
 object DataParser {
+
+    private const val GUAP_API_URI_BASE = "https://api.guap.ru/rasp/custom/get-sem-rasp/group"
+    private const val GUAP_API_URI_GROUPS = "https://api.guap.ru/rasp/custom/get-sem-groups"
+    private const val STORED_SCHEDULE_FILE = "StoredSchedule"
+    val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "settings")
 
     fun parseSubjects(appContext: Context): List<List<Subject>> {
         val subjects: List<Subject> =
@@ -144,18 +147,6 @@ object DataParser {
         } else Toast.makeText(appContext, "Не удалось получить список групп", Toast.LENGTH_SHORT)
             .show()
         return receive
-    }
-
-    fun checkInternet(appContext: Context): Boolean {
-        val connectivityManager =
-            appContext.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-        val network = connectivityManager.activeNetwork ?: return false
-        val activeNetwork = connectivityManager.getNetworkCapabilities(network) ?: return false
-        return when {
-            activeNetwork.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) -> true
-            activeNetwork.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) -> true
-            else -> false
-        }
     }
 
     suspend fun usePrefGroup(appContext: Context){
